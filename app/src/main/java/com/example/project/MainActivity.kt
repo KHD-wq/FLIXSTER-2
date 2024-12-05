@@ -1,55 +1,111 @@
-package com.example.project
+package com.example.project1
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.enableEdgeToEdge
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.example.project.R
 
+var wordToGuess = FourLetterWordList.getRandomFourLetterWord()
 class MainActivity : AppCompatActivity() {
 
-    private val movies= mutableListOf<com.example.flixster.Movie>()
-    private lateinit var rvMovies: RecyclerView
 
+    @SuppressLint("MissingInflatedId", "CutPasteId", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(com.example.flixster.R.layout.activity_main)
-        rvMovies = findViewById(com.example.flixster.R.id.rvMovies)
+        setContentView(R.layout.activity_main)
+        val editTextAnswer = findViewById<EditText>(R.id.EditTextAnswer)
+        val button = findViewById<Button>(R.id.Button)
+        val guess1 = findViewById<TextView>(R.id.Guess1)
+        val guess2 = findViewById<TextView>(R.id.Guess2)
+        val guess3 = findViewById<TextView>(R.id.Guess3)
+        val answerProgress = findViewById<TextView>(R.id.AnswerProgress)
+        val answerProgress2 = findViewById<TextView>(R.id.AnswerProgress2)
+        val answerProgress3 = findViewById<TextView>(R.id.AnswerProgress3)
+        val final = findViewById<TextView>(R.id.Final)
+        val guesses = findViewById<TextView>(R.id.Guesses)
+        while (guesses.text.toString() == "Guesses") {
+            guesses.text = "Guesses: 3"
+            button.setOnClickListener {
+                val answer = editTextAnswer.text.toString()
+                if (answer == wordToGuess) {
+                    answerProgress.text = checkGuess(answer)
+                    final.text = wordToGuess
 
-        val movieAdapter = com.example.flixster.MovieAdapter(this, movies)
-        rvMovies.adapter = movieAdapter
-        rvMovies.layoutManager = LinearLayoutManager(this)
+                } else {
+                    guess1.text = editTextAnswer.text.toString()
+                    answerProgress.text = final.text
+                    answerProgress.text = checkGuess(answer)
+                    guesses.text = "Guesses: 2"
+                if (guesses.text.toString() == "Guesses: 2"){
+                    button.setOnClickListener{
+                        val answer2 = editTextAnswer.text.toString()
+                        if (answer2 == wordToGuess){
+                            guess2.text = editTextAnswer.text.toString()
+                            answerProgress2.text = checkGuess(answer2)
+                            final.text = wordToGuess
+                        }else{
+                            guess2.text = editTextAnswer.text.toString()
+                            answerProgress2.text = checkGuess(answer2)
+                            guesses.text = "Guesses: 1"
+                        }
+                        if (guesses.text.toString() == "Guesses: 1"){
+                            button.setOnClickListener{
+                                val answer3 = editTextAnswer.text.toString()
+                                if (answer3 == wordToGuess){
+                                    guess3.text = editTextAnswer.text.toString()
+                                    answerProgress3.text = checkGuess(answer3)
+                                    final.text = wordToGuess
+                                }else{
+                                    guess3.text = editTextAnswer.text.toString()
+                                    answerProgress3.text = checkGuess(answer3)
+                                    guesses.text = "Guesses: 0"
+                                }
+                                if (guesses.text == "Guesses: 0"){
+                                    final.text = wordToGuess
 
-        val client = com.codepath.asynchttpclient.AsyncHttpClient()
-        client.get(com.example.flixster.NOW_PLAYING_URL, object: com.codepath.asynchttpclient.callback.JsonHttpResponseHandler(){
-            override fun onFailure(
-                statusCode: Int, headers: okhttp3.Headers?, response: String?, throwable: Throwable?
-            ) {
-                Log.e(com.example.flixster.TAG, "onFailure $statusCode")
+                                }
+                                button.text = "                     Reset"
+                                button.setOnClickListener{
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+                }
             }
-
-            @SuppressLint("NotifyDataSetChanged")
-            override fun onSuccess(statusCode: Int, headers: okhttp3.Headers?, json: com.codepath.asynchttpclient.callback.JsonHttpResponseHandler.JSON) {
-                Log.i(com.example.flixster.TAG, "onSuccess: JSON data $json")
-                val movieJsonArray = json.jsonObject.getJSONArray("results")
-                movies.addAll(com.example.flixster.Movie.Companion.fromJsonArray(movieJsonArray))
-                movieAdapter.notifyDataSetChanged()
-                Log.i(com.example.flixster.TAG, "Movie List $movies")
-
-            }
-
-        })
-
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(com.example.flixster.R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
         }
+
+
+
     }
 }
+    /**
+     * Parameters / Fields:
+     *   wordToGuess : String - the target word the user is trying to guess
+     *   guess : String - what the user entered as their guess
+     *
+     * Returns a String of 'O', '+', and 'X', where:
+     *   'O' represents the right letter in the right place
+     *   '+' represents the right letter in the wrong place
+     *   'X' represents a letter not in the target word
+     */
+
+    private fun checkGuess(guess: String): String {
+        var result = ""
+        for (i in 0..3) {
+            if (guess[i] == wordToGuess[i]) {
+                result += "O"
+            } else if (guess[i] in wordToGuess) {
+                result += "+"
+            } else {
+                result += "X"
+            }
+        }
+        return result
+    }
+
